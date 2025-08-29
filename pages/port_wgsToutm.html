@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bootstrap Components</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+        <style>
+            .container-fluid{
+            background-color: #A4B465;
+            }
+            
+            .navbar-expand-lg {
+                background-color: #A4B465 !important;
+                }
+            
+            #navigation_bar{
+                background-color: #A4B465;
+                }
+
+            .rounded-circle{
+            width:450px;
+            height:450px;
+            border-radius:50%;
+            object-fit:cover
+            }
+        
+            #profile_img_div{
+            padding-right: 0%;
+            }
+        
+            .btn-primary{
+            background-color: #A4B465;
+            border-color: black;
+            }
+        </style>
+    </head>
+        
+    <body class="m-0 border-0 bd-example m-0 border-0">
+        
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+              <button
+                class="navbar-toggler collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarTogglerDemo01"
+                aria-controls="navbarTogglerDemo01"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="navbar-collapse collapse" id="navbarTogglerDemo01" style="">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a href="/index.html" class="nav-link active" aria-current="page">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="resume.html" class="nav-link">Resume</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/pages/port.html" class="nav-link">GIS and Remote Sensing</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+
+
+        <div class="pt-3 text-center">
+            <h1>WGS84 Coordinates to WGS84 UTM Zones</h1>
+            <p>Resize this responsive page to see the effect!</p> 
+        </div>
+
+        <div class="container mt-1" align="center">
+            <img src="/assets/img/wgsToUtm/utm_zones.png" width="50%" height="350" alt="">
+        </div>
+        <div class="container mt-1" align="center">
+            <small>UTM grid zones on a projected map of the world © Wikimedia Commons</small>
+        </div>
+
+        <div class="container mt-3 p-3">
+        <div>
+            <h2>Coordinate Systems</h2>
+            <p>When I was started my first GIS internship years ago, one of the first and most common problem that I ran into was transformation
+                of shapefiles from one coordinate system to another. The survey data, as dictated by hardware
+                available, was in geographic coordinate system (NAD83 EPSG:4269 or WGS84 EPSG:4326). However libraries such as <a href="https://gdal.org/en/stable/programs/gdal_grid.html">GDAL_GRID</a>
+                was easiet to work with when coordinate system (WGS84 UTM) unit was in meters.
+            </p>
+            <p>
+                Unfortunately, there are 60 UTM zones and the data comes from all over the world. My brain capacity was not sufficient to calculate which UTM zone each data belong to. 
+                Using <a href="https://epsg.io/map#srs=4326&x=0.000000&y=0.000000&z=1&layer=streets">EPSG converter</a> was not pratical for automation purpose. Thus, I came up with a solution to convert geographic coordinates to WGS84 UTM EPSG code. 
+                While not most elegant solution, it seems to work well and I still use it to these days.
+            </p>
+        </div>
+        <div>
+            <pre>
+                <code>
+                    #!/usr/bin/env python3
+                    # -*- coding: utf-8 -*-
+                    """
+                    Filename: wgs84_utm.py
+                    Author: Bo Shan
+                    Date: 2024-09-23
+                    Version: 1.5
+                    Description: A simple script that I created in my worfklow to determine EPSG code of corresponding WGS 84 Zone 
+                                The output is used do conversion in geopandas or other python libraries.
+                    License: MIT License
+                    Contact: boshan.geospatial@gmail.com
+                    """
+
+                    def cal_utm_epsg(gcs_coord:tuple)->str:
+                        """Determine UTM zone from GCS coord (Longitude, Latitude)-> (-100.883577,  35.250122)
+
+
+
+                        :param _type_ gcsCoord: a tuple representation of coordinate (long, lat)
+                        :return _type_: zone# N/S and epsg code corresponding to the coordinate system of WGS 84 UTM Zone  -> 17N, 32610
+                        """
+                        LONG = float(gcs_coord[0])
+                        LAT = float(gcs_coord[1])
+
+                        if abs(LONG) > 180 or abs(LAT)>90:
+                            #check if input coordinate is out of bounds of wgs84
+                            raise ValueError("Input Coordinate Out of Bounds")
+
+                        # #prime meridian/central zone of WGS 84 UTM is 32630 and starting point
+                        epsg_code = 32630
+
+                        zone_diff = abs(int(LONG/6.0)) #calcuate difference in utm zones
+
+                        if LONG < 0:
+                            #negative longitude => western hemisphere
+                            zone_num = 30 - zone_diff
+                            temp_epsg_code = epsg_code - zone_diff #calculate final epsg code
+                            
+                        elif LONG >= 0:
+                            #positive longitude => eastern hemisphere
+                            zone_num = 31 + zone_diff
+                            temp_epsg_code = epsg_code + zone_diff
+
+                        if LAT >= 0:
+                            zone_number = f'{zone_num}N'
+                            final_code = temp_epsg_code
+                        else:
+                            zone_number = f'{zone_num}S'
+                            final_code = temp_epsg_code + 100
+                            
+
+                        return zone_number, final_code
+                </code>
+            </pre>
+        </div>
+
+        <div class="container">
+            <footer class="py-3 my-4">
+              <ul class="nav  nav-fill nav-justified border-top pb-3 mb-3">
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary"><img src="icons/phone.svg" alt=""> 2269779688</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary"><img src="icons/envelope.svg" alt=""> boshan.geospatial@gmail.com</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary"><img src="icons/github.svg" alt=""> Github</a></li>
+              </ul>
+              <p class="text-center text-body-secondary">© 2025 Bo Shan</p>
+            </footer>
+          </div>
+    
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    </body>
+</html>

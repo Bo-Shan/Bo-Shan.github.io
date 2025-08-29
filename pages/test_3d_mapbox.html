@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=25.0"> -->
+        <title>Bootstrap Components</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+        
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="/resources/leaflet.ajax.js"></script>
+
+        <!-- minified version is used for actual web - have to load turf.min.js -->
+
+
+        <style>
+
+            .navbar-expand-lg {
+                background-color: #A4B465 !important;
+                }
+            
+            #navigation_bar{
+                background-color: #A4B465;
+                }
+
+            .container-fluid{
+            background-color: #A4B465;
+            }
+            
+            .rounded-circle{
+            width:450px;
+            height:450px;
+            border-radius:50%;
+            object-fit:cover
+            }
+        
+            #profile_img_div{
+            padding-right: 0%;
+            }
+        
+            .btn-primary{
+            background-color: #A4B465;
+            border-color: black;
+            }
+
+
+            #map_container{
+
+                    
+                width: 60vw;
+                height: 60vh;
+            }
+
+            #map_container2{
+
+                                
+            width: 80vw;
+            height: 60vh;
+            }
+
+            #map { 
+            position: absolute;
+            width: 60vw;
+            height: 60vh;
+            right:20vw;
+            }
+
+            #map_leaf{
+                position: absolute;
+                width: 80vw;
+                height: 80vh;
+                right:10vw;
+            }
+        
+        </style>
+
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+        <link href="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.css" rel="stylesheet">
+        <script src="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.js"></script>
+        
+
+    </head>
+        
+    <body class="m-0 border-0 bd-example m-0 border-0">
+        
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+              <button
+                class="navbar-toggler collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarTogglerDemo01"
+                aria-controls="navbarTogglerDemo01"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="navbar-collapse collapse" id="navbarTogglerDemo01" style="">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link active" aria-current="page">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="resume.html" class="nav-link">Resume</a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/pages/port.html" class="nav-link">GIS and Remote Sensing</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+
+        <div class="pt-3 text-center">
+            <h1>Food Blog</h1>
+        </div>
+
+        <!-- <div class="container mt-1" align="center">
+            <img src="/assets/img/wgsToUtm/utm_zones.png" width="50%" height="350" alt="">
+        </div> -->
+
+        <!-- <div class ="col-sm" id="map_container">
+            <p>mapbox</p>
+        <div id="map">
+            <script>
+                mapboxgl.accessToken = 'pk.eyJ1IjoiYnNoYW44OWdlbyIsImEiOiJjbTdwM2d4amowaTVzMnJvaG05M3pjdDF1In0.bZMbwiba5D8vvh7LEkL04A';
+                const map = new mapboxgl.Map({
+                    container: 'map', // container ID
+                    center: [-74.5, 40], // starting position [lng, lat]. Note that lat must be set between -90 and 90
+                    zoom: 9 // starting zoom
+                });
+            </script>
+        </div>
+        </div> -->
+
+        <!-- leaflet maps -->
+        <div class ="col-sm mt-5" id="map_container2">
+        <div id="map_leaf">
+            <script>
+              var resIcon = L.icon({
+                  iconUrl: '/icons/restaurant.png',
+                  iconSize:     [25, 25], // size of the icon
+                  iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+                  popupAnchor:  [-3, -15] // point from which the popup should open relative to the iconAnchor
+              });
+
+
+                mapboxgl.accessToken = 'pk.eyJ1IjoiYnNoYW44OWdlbyIsImEiOiJjbTdwM2d4amowaTVzMnJvaG05M3pjdDF1In0.bZMbwiba5D8vvh7LEkL04A';
+                var map_leaf = L.map('map_leaf').setView([43.343, -81.3433], 3);
+                var background_leaf = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                })
+                map_leaf.addLayer(background_leaf);
+
+
+                //get cursor information
+              //   map_leaf.on('mousemove', function(e)
+              // {
+              //   var str= 'lat ' +e.latlng.lat.tofixed(5) + ' longi ' + e.latlng.lng.toFixed(5);
+
+              // when opening the geojson, using ajax, the var is actually a binary object, have to convert to geojson to use truf
+              // })
+                var geojsonlayer = new L.GeoJSON.AJAX('/resources/joined/final_food.geojson',
+                  {pointToLayer: function(feature, latlng){
+                    // add button
+
+
+                    var str = "<h6 style='text-align: center'>"+feature.properties.date+"</h6>"
+                    str += "<img src='/assets/img/foodblog/" + feature.properties.Img_Name+"'width='250px'>"
+                    return L.marker(latlng, {icon:resIcon}).bindPopup(str);
+                  }});
+                geojsonlayer.addTo(map_leaf)
+
+            </script>
+        </div>
+        </div>
+        
+
+        <div class="container">
+            <footer class="py-3 my-4">
+              <ul class="nav  nav-fill nav-justified border-top pb-3 mb-3">
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary"><img src="icons/phone.svg" alt=""> 2269779688</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary"><img src="icons/envelope.svg" alt=""> boshan.geospatial@gmail.com</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary"><img src="icons/github.svg" alt=""> Github</a></li>
+              </ul>
+              <p class="text-center text-body-secondary">© 2025 Bo Shan</p>
+            </footer>
+          </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    
+    <!-- <script>
+        document.body.addEventListener("click", function(e){
+            console.log("clicked in the body")
+            //comments map. var map = document.getElementByID("map")
+            map.flyTo({
+                center: [-81.343, 41.3432]
+            });
+        }) -->
+<!-- 
+        //same as $(document) in jquery
+
+        //select class $(".class-name")
+
+        // select ID $('#my-link')
+
+        //# descendant - select children $("#navBar a") - a tags within navbar element descendant
+
+
+        //document.ready(function()) : do something when the page is loaded -->
+    </script>
+    </body>
+</html>
